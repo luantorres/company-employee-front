@@ -2,20 +2,21 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Api from '../../service/api';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import { Alert, Button, Col, Form } from 'react-bootstrap';
+import { Alert, Breadcrumb, Button, Col, Form, InputGroup } from 'react-bootstrap';
 import InputMask from 'react-input-mask';
+import { Link } from 'react-router-dom';
 
-function EmployeeForm({ companyId }) {
+function EmployeeForm() {
     const [employeeData, setEmployeeData] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const { employeeId } = useParams();
+    const { employeeId, companyId } = useParams();
 
     useEffect(() => {
-        if (employeeId !== 'new') {
+        if (employeeId && employeeId !== 'new') {
             getEmployeeDataFromApi(employeeId);
         }
-    }, [companyId]);
+    }, [employeeId]);
 
     function handleEmployeeForm(el) {
         const { name, value } = el.target;
@@ -37,21 +38,19 @@ function EmployeeForm({ companyId }) {
         const res = await Api.get(`companies/${companyId}/employees/${employeeId}`);
 
         if (res.status === 200 && res.data) {
-            setEmployeeData({ ...res.data, cep: res.data.address.zipCode, number: res.data.address.number });
+            setEmployeeData({ ...res.data });
         }
     }
 
     async function putEmployee() {
-        const { phone, cep: zipCode, number } = employeeData;
+        const { name, salary, role } = employeeData;
         const putData = {
-            phone,
-            address: {
-                zipCode,
-                number: parseInt(number)
-            }
+            name,
+            salary,
+            role
         }
 
-        Api.put(`employees/${employeeId}`, putData)
+        Api.put(`companies/employees/${employeeId}`, putData)
             .then(response => {
                 setSuccessMessage('Funcionário editada com sucesso!');
                 setTimeout(() => setSuccessMessage(''), 4000);
@@ -63,17 +62,14 @@ function EmployeeForm({ companyId }) {
     }
 
     async function postEmployee() {
-        const { name, phone, cep: zipCode, number } = employeeData;
+        const { name, salary, role } = employeeData;
         const postData = {
             name,
-            phone,
-            address: {
-                zipCode,
-                number: parseInt(number)
-            }
+            salary: parseFloat(salary),
+            role
         }
 
-        Api.post(`employees`, postData)
+        Api.post(`companies/${companyId}/employees`, postData)
             .then(response => {
                 setSuccessMessage('Funcionário criada com sucesso!');
                 setTimeout(() => setSuccessMessage(''), 4000);
@@ -86,6 +82,10 @@ function EmployeeForm({ companyId }) {
 
     return (
         <div className="container">
+            <Breadcrumb>
+                <Link to={`/`} className="breadcrumb-item">Home</Link>
+                <Link to={`/companies/${companyId}`} className="breadcrumb-item">Empresa</Link>
+            </Breadcrumb>
             {employeeId !== 'new'
                 ? <h1>Editar Funcionário</h1>
                 : <h1>Cadastrar Funcionário</h1>
@@ -94,13 +94,26 @@ function EmployeeForm({ companyId }) {
                 <Form.Row>
                     <Form.Group as={Col} controlId="employeeName" lg="8">
                         <Form.Label>Nome do Funcionário</Form.Label>
-                        <Form.Control name="name" type="text" placeholder="Nome da empresa" value={employeeData.name} onChange={(el) => { handleEmployeeForm(el); }} />
+                        <Form.Control name="name" type="text" placeholder="Nome do funcionário" value={employeeData.name} onChange={(el) => { handleEmployeeForm(el); }} />
                     </Form.Group>
 
                     <Form.Group as={Col} controlId="employeeSalary" lg="4">
-                        <Form.Label>Telefone</Form.Label>
-                        <InputMask name="salary" type="number" className="form-control" placeholder="Salário" value={employeeData.salary} onChange={(el) => { handleEmployeeForm(el); }} />
+                        <Form.Label>Salário</Form.Label>
+                        <InputGroup>
+                            <InputGroup.Text>R$</InputGroup.Text>
+                            <InputMask name="salary" type="number" className="form-control" placeholder="Salário" value={employeeData.salary} onChange={(el) => { handleEmployeeForm(el); }} />
+                        </InputGroup>
                     </Form.Group>
+
+                    <Form.Group as={Col} controlId="employeeRole" lg="4">
+                        <Form.Label>Cargo</Form.Label>
+                        <select name="role" className="form-control" value={employeeData.role} onChange={(el) => { handleEmployeeForm(el); }} >
+                            <option value="Front-End">Front-End</option>
+                            <option value="Back-End">Back-End</option>
+                            <option value="Design">Design</option>
+                        </select>
+                    </Form.Group>
+
                 </Form.Row>
 
                 {errorMessage

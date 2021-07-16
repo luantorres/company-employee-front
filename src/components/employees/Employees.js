@@ -2,10 +2,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Api from '../../service/api';
 import { useEffect, useState } from 'react';
 import { Alert, Button, Modal, Table } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Pagination from '../pagination/Pagination';
+import Companies from '../companies/Companies';
 
 const defaultPage = {
     limit: 3,
@@ -13,14 +14,13 @@ const defaultPage = {
     pages: 0
 }
 
-function Employees() {
+function Employees({ companyId }) {
     const [employees, setEmployees] = useState([]);
     const [pagination, setPagination] = useState(defaultPage);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteEmployeeId, setDeleteEmployeeId] = useState(false);
-    const { companyId } = useParams();
 
     const handleCloseDeleteModal = () => {
         setDeleteEmployeeId(false);
@@ -51,9 +51,9 @@ function Employees() {
 
     async function deleteEmployee(employeeId) {
         if (employeeId) {
-            Api.delete(`employees/${employeeId}`)
+            Api.delete(`companies/employees/${employeeId}`)
                 .then(response => {
-                    setSuccessMessage('Funcionário deletada!');
+                    setSuccessMessage('Funcionário deletado!');
                     getEmployees();
                     setTimeout(() => setSuccessMessage(''), 4000);
                 })
@@ -89,7 +89,7 @@ function Employees() {
                     <Modal.Title>Deseja deletar a empresa?</Modal.Title>
                 </Modal.Header>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={(el) => handleCloseDeleteModal}>
+                    <Button variant="secondary" onClick={handleCloseDeleteModal}>
                         Não
                     </Button>
                     <Button variant="primary"
@@ -103,36 +103,42 @@ function Employees() {
                 </Modal.Footer>
             </Modal>
 
-            <h1 className="mt-2">Funcionários</h1>
-            <Link to="/employees/new" className="btn btn-primary">Cadastrar funcionário</Link>
-            <Table striped bordered hover className="mt-3">
-                <thead className="thead-dark">
-                    <tr>
-                        <th>Funcionário</th>
-                        <th>Telefone</th>
-                        <th>Endereço</th>
-                        <th className="text-center">Opções</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {employees.map(employee => (
-                        <tr key={employee._id}>
-                            <td>{employee.name}</td>
-                            <td>{employee.salary}</td>
-                            <td>{employee.company.name}</td>
-                            <td className="text-center">
-                                <Link to={`/employees/${employee._id}`} className="m-2 btn btn-primary">
-                                    <FontAwesomeIcon icon={faPenAlt} />
-                                </Link>
-                                <Button variant="danger" onClick={(el) => handleShowDeleteModal(employee._id)}>
-                                    <FontAwesomeIcon icon={faTrash} />
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-            <Pagination limit={pagination.limit} page={pagination.page} pages={pagination.pages} paginate={paginate} />
+            <h3>Funcionários</h3>
+            <Link to={`/companies/${companyId}/employees/new`} className="btn btn-primary">Cadastrar funcionário</Link>
+            {employees.length
+                ?
+                    <>
+                        <Table striped bordered hover className="mt-3">
+                            <thead className="thead-dark">
+                                <tr>
+                                    <th>Funcionário</th>
+                                    <th>Salário</th>
+                                    <th>Cargo</th>
+                                    <th className="text-center">Opções</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {employees.map(employee => (
+                                    <tr key={employee._id}>
+                                        <td>{employee.name}</td>
+                                        <td>{employee.salary}</td>
+                                        <td>{employee.role}</td>
+                                        <td className="text-center">
+                                            <Link to={`/companies/${companyId}/employees/${employee._id}`} className="m-2 btn btn-primary">
+                                                <FontAwesomeIcon icon={faPenAlt} />
+                                            </Link>
+                                            <Button variant="danger" onClick={(el) => handleShowDeleteModal(employee._id)}>
+                                                <FontAwesomeIcon icon={faTrash} />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                        <Pagination limit={pagination.limit} page={pagination.page} pages={pagination.pages} paginate={paginate} />
+                    </>
+                : ''
+            }
         </div>
     );
 }
