@@ -88,7 +88,7 @@ function Companies() {
                     <Modal.Title>Deseja deletar a empresa?</Modal.Title>
                 </Modal.Header>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={(el) => handleCloseDeleteModal}>
+                    <Button variant="secondary" onClick={handleCloseDeleteModal}>
                         Não
                     </Button>
                     <Button variant="primary"
@@ -104,34 +104,40 @@ function Companies() {
 
             <h1 className="mt-2">Empresas</h1>
             <Link to="/companies/new" className="btn btn-primary">Cadastrar empresa</Link>
-            <Table striped bordered hover className="mt-3">
-                <thead className="thead-dark">
-                    <tr>
-                        <th>Empresa</th>
-                        <th>Telefone</th>
-                        <th>Endereço</th>
-                        <th className="text-center">Opções</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {companies.map(company => (
-                        <tr key={company._id}>
-                            <td>{company.name}</td>
-                            <td>{company.phone}</td>
-                            <td>{company.address.address}, {company.address.district} - {company.address.number} - {company.address.city} - {company.address.state}{company.address.complement ? `Complemento: ${company.address.complement}` : ''}</td>
-                            <td className="text-center">
-                                <Link to={`/companies/${company._id}`} className="m-2 btn btn-primary">
-                                    <FontAwesomeIcon icon={faPenAlt} />
-                                </Link>
-                                <Button variant="danger" onClick={(el) => handleShowDeleteModal(company._id) }>
-                                    <FontAwesomeIcon icon={faTrash} />
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-            <Pagination limit={pagination.limit} page={pagination.page} pages={pagination.pages} paginate={paginate} />
+            {companies && companies.length
+                ?
+                <>
+                    <Table striped bordered hover className="mt-3">
+                        <thead className="thead-dark">
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Telefone</th>
+                                <th>Endereço</th>
+                                <th className="text-center">Opções</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {companies.map(company => (
+                                <tr key={company._id}>
+                                    <td>{company.name}</td>
+                                    <td>{company.phone}</td>
+                                    <td>{company.address.address}, {company.address.district} - {company.address.number} - {company.address.city} - {company.address.state}{company.address.complement ? `Complemento: ${company.address.complement}` : ''}</td>
+                                    <td className="text-center">
+                                        <Link to={`/companies/${company._id}`} className="m-2 btn btn-primary">
+                                            <FontAwesomeIcon icon={faPenAlt} />
+                                        </Link>
+                                        <Button variant="danger" onClick={(el) => handleShowDeleteModal(company._id) }>
+                                            <FontAwesomeIcon icon={faTrash} />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                    <Pagination limit={pagination.limit} page={pagination.page} pages={pagination.pages} paginate={paginate} />
+                </>
+                : ''
+            }
         </div>
     );
 }

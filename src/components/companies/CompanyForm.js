@@ -3,8 +3,10 @@ import Api from '../../service/api';
 import viacepApi from '../../service/viacep';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import { Alert, Button, Col, Form } from 'react-bootstrap';
+import { Alert, Breadcrumb, Button, Card, Col, Form } from 'react-bootstrap';
 import InputMask from 'react-input-mask';
+import EmployeesList from '../employees/Employees';
+import { Link } from 'react-router-dom';
 
 const emptyCepData = {
     cep: '',
@@ -130,15 +132,21 @@ function CompanyForm() {
 
     return (
         <div className="container">
+            <Breadcrumb>
+                <Link to={`/`} className="breadcrumb-item">Home</Link>
+                <Link to={`/companies`} className="breadcrumb-item">Todas as empresas</Link>
+            </Breadcrumb>
+
             {companyId !== 'new'
                 ? <h1>Editar Empresa</h1>
                 : <h1>Cadastrar Empresa</h1>
             }
+
             <Form className="text-left" onSubmit={handleSubmit}>
                 <Form.Row>
                     <Form.Group as={Col} controlId="companyName" lg="8">
                         <Form.Label>Nome de empresa</Form.Label>
-                        <Form.Control name="name" type="text" placeholder="Nome da empresa" value={companyData.name} onChange={(el) => {handleCompanyForm(el);}} />
+                        <Form.Control name="name" type="text" placeholder="Nome da empresa" value={companyData.name} onChange={(el) => { handleCompanyForm(el); }} disabled={companyId !== 'new'} />
                     </Form.Group>
 
                     <Form.Group as={Col} controlId="companyPhone" lg="4">
@@ -174,6 +182,7 @@ function CompanyForm() {
                             value={companyData.number}
                             onChange={(el) => {
                                 handleCompanyForm(el);
+                                handleAddressChange(el);
                             }}
                         />
                     </Form.Group>
@@ -207,6 +216,22 @@ function CompanyForm() {
                         <Form.Control type="text" placeholder="" name="uf" readOnly onChange={(el) => handleAddressChange(el)} value={cepData.uf} />
                     </Form.Group>
                 </Form.Row>
+
+                {companyId && companyId !== 'new'
+                    ?
+                    <>
+                        <Form.Row>
+                            <Form.Group as={Col} xs="12">
+                                <Card>
+                                    <Card.Body>
+                                        <EmployeesList companyId={companyId} />
+                                    </Card.Body>
+                                </Card>
+                            </Form.Group>
+                        </Form.Row>
+                    </>
+                    : ''
+                }
 
                 {errorMessage
                     ? (
